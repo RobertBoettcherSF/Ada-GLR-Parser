@@ -29,7 +29,6 @@ package body GLR_Parser is
       Next_Heads : Head_Array;
       
       Success_Count : Natural := 0;
-      Active_Count  : Natural := 0;
       Token_Ptr     : Token_Index := Input'First;
 
       procedure Push (H : in out Parse_Head; S : State_ID) is
@@ -71,17 +70,19 @@ package body GLR_Parser is
       --  Initialize first head at State 0
       Heads (1).Active := True;
       Push (Heads (1), 0);
-      Active_Count := 1;
 
       --  Process each token
       while Token_Ptr <= Input'Last loop
          declare
             Current_Token : constant Symbol_ID := Input (Token_Ptr);
-            Moved_To_Next_Token : Boolean := False;
             
             --  We use a copy array to stage heads for the next token shift
             Next_Heads_Count : Natural := 0;
          begin
+            if Current_Token > G.Max_Symbol then
+               return Parse_Syntax_Error;
+            end if;
+
             Next_Heads := [others => (Stack => [others => 0], Depth => 0, State => 0, Active => False)];
 
             --  Process epsilon-reductions/reductions until all active heads either Shift or Error
@@ -92,7 +93,7 @@ package body GLR_Parser is
                   for I in Heads'Range loop
                      if Heads (I).Active then
                         declare
-                           H : Parse_Head := Heads (I);
+                           H : constant Parse_Head := Heads (I);
                            Cell : constant Action_Cell := G.Actions (H.State, Current_Token);
                         begin
                            if Cell.Count = 0 then
