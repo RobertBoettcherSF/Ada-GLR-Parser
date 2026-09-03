@@ -1,5 +1,3 @@
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
 --  Generalized LR (GLR) Parser Framework (ISO/IEC 8652:2023)
 --  Implements Tomita's algorithm variations for non-deterministic and ambiguous grammars.
 package GLR_Parser is
